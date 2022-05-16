@@ -1,61 +1,97 @@
 import React from 'react';
-import { useSignInWithEmailAndPassword, useSignInWithGoogle } from 'react-firebase-hooks/auth';
+import { useCreateUserWithEmailAndPassword, useSignInWithGoogle, useUpdateProfile } from 'react-firebase-hooks/auth';
 import auth from '../../firebase.init';
 import { useForm } from "react-hook-form";
 import Loading from '../Shared/Loading';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const SignUp = () => {
 
-    // Using react firebase hook
+    // Using react firebase hook [google signin]
     const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
     // Using react form hook
     const { register, formState: { errors }, handleSubmit } = useForm();
-    // Using react firebase hook
+    // Using react firebase hook [create user]
     const [
-        signInWithEmailAndPassword,
+        createUserWithEmailAndPassword,
         user,
         loading,
         error,
-    ] = useSignInWithEmailAndPassword(auth);
+    ] = useCreateUserWithEmailAndPassword(auth);
+    // Using react firebase hook [update user]
+    const [updateProfile, updating, UpdateError] = useUpdateProfile(auth);
+
+
+    const navigate = useNavigate();
 
     let signInError;
-    // navigate by using RequreAuth
-    const navigate = useNavigate();
-    const location = useLocation();
-    let from = location.state?.from?.pathname || "/";
-
 
     if (loading || gLoading) {
         return <Loading></Loading>
     }
 
-    if (error || gError) {
-        signInError = <p className='text-red-500'><small>{error?.message || gError?.message}</small></p>
+    if (error || gError || UpdateError) {
+        signInError = <p className='text-red-500'><small>{error?.message || gError?.message} {UpdateError?.message}</small></p>
     }
 
-    if (user || gUser) {
-        // console.log(user || gUser)
-        navigate(from, { replace: true });
+    if (user || gUser || updating) {
+        console.log(user || gUser)
     }
 
 
     // submit login form event handler
-    const onSubmit = data => {
-        console.log(data);
-        signInWithEmailAndPassword(data.email, data.password);
+    const onSubmit = async data => {
+        // console.log(data);
+        // create user
+        await createUserWithEmailAndPassword(data.email, data.password);
+        // update profile
+        await updateProfile({ displayName: data.name });
+        console.log('Updated profile');
+        // when user singUp navigate appointment page
+        navigate('/appointment');
     };
-
 
     return (
         <div className="flex justify-center items-center h-screen">
             <div className="card w-96 bg-base-100 shadow-xl">
                 <div className="card-body">
-                    <h2 className="text-3xl font-bold text-center text-primary">Login</h2>
+                    <h2 className="text-3xl font-bold text-center text-primary">Sign Up</h2>
 
 
-                    {/* Login Form */}
+                    {/* Sign Up Form */}
                     <form onSubmit={handleSubmit(onSubmit)}>
+
+                        {/* ___ name field ___ */}
+                        <div class="form-control w-full max-w-xs">
+                            <label class="label">
+                                <span class="label-text">Name</span>
+
+                            </label>
+                            <input
+
+                                type="text"
+                                placeholder="Your name"
+                                class="input input-bordered w-full max-w-xs"
+
+                                // name validation
+                                {...register("name", {
+                                    required: {
+                                        value: true,
+                                        message: 'Name is required'
+                                    }
+                                })}
+                            />
+
+                            {/* show name validation error on ui */}
+                            <label class="label">
+
+                                {errors.name?.type === 'required' && <span className="label-text-alt text-red-500 ">{errors.name.message}</span>}
+
+                            </label>
+                        </div>
+
+
+
 
                         {/* ___ email field ___ */}
                         <div class="form-control w-full max-w-xs">
@@ -82,7 +118,7 @@ const Login = () => {
                                 })}
                             />
 
-                            {/* show email validation error on ui */}
+                            {/* show email validation on ui */}
                             <label class="label">
 
                                 {errors.email?.type === 'required' && <span className="label-text-alt text-red-500 ">{errors.email.message}</span>}
@@ -116,7 +152,7 @@ const Login = () => {
                                 })}
                             />
 
-                            {/* show password validation error on ui */}
+                            {/* show password validation on ui */}
                             <label class="label">
 
                                 {errors.password?.type === 'required' && <span className="label-text-alt text-red-500 ">{errors.password.message}</span>}
@@ -129,11 +165,11 @@ const Login = () => {
                         {signInError}
 
                         {/* submit button */}
-                        <input className='btn w-full max-w-xs' type="submit" value='Login' />
+                        <input className='btn w-full max-w-xs' type="submit" value='Sign Up' />
                     </form>
 
                     {/* toggle signup page */}
-                    <p><small>New to Doctors Portal <Link className='text-primary' to='/signup'>Create new account</Link></small></p>
+                    <p><small>Already have an account? <Link className='text-primary' to='/login'>Please Login</Link></small></p>
 
                     <div className="divider">OR</div>
                     <button onClick={() => signInWithGoogle()} className="btn btn-outline">Continue With Google</button>
@@ -143,4 +179,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default SignUp;
