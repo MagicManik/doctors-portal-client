@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSignInWithEmailAndPassword, useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import auth from '../../firebase.init';
 import { useForm } from "react-hook-form";
 import Loading from '../Shared/Loading';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import useToken from '../../hooks/useToken';
 
 const Login = () => {
 
@@ -19,11 +20,20 @@ const Login = () => {
         error,
     ] = useSignInWithEmailAndPassword(auth);
 
+    const [token] = useToken(user || gUser);
+
     let signInError;
     // navigate by using RequreAuth
     const navigate = useNavigate();
     const location = useLocation();
     let from = location.state?.from?.pathname || "/";
+
+    useEffect(() => {
+        if (token) {
+
+            navigate(from, { replace: true });
+        }
+    }, [token, from, navigate])
 
 
     if (loading || gLoading) {
@@ -32,11 +42,6 @@ const Login = () => {
 
     if (error || gError) {
         signInError = <p className='text-red-500'><small>{error?.message || gError?.message}</small></p>
-    }
-
-    if (user || gUser) {
-        // console.log(user || gUser)
-        navigate(from, { replace: true });
     }
 
 
@@ -58,16 +63,16 @@ const Login = () => {
                     <form onSubmit={handleSubmit(onSubmit)}>
 
                         {/* ___ email field ___ */}
-                        <div class="form-control w-full max-w-xs">
-                            <label class="label">
-                                <span class="label-text">Email</span>
+                        <div className="form-control w-full max-w-xs">
+                            <label className="label">
+                                <span className="label-text">Email</span>
 
                             </label>
                             <input
 
                                 type="email"
                                 placeholder="Your email"
-                                class="input input-bordered w-full max-w-xs"
+                                className="input input-bordered w-full max-w-xs"
 
                                 // email validation
                                 {...register("email", {
@@ -83,7 +88,7 @@ const Login = () => {
                             />
 
                             {/* show email validation error on ui */}
-                            <label class="label">
+                            <label className="label">
 
                                 {errors.email?.type === 'required' && <span className="label-text-alt text-red-500 ">{errors.email.message}</span>}
 
@@ -93,15 +98,15 @@ const Login = () => {
 
 
                         {/* ___ password field ___ */}
-                        <div class="form-control w-full max-w-xs">
-                            <label class="label">
-                                <span class="label-text">Password</span>
+                        <div className="form-control w-full max-w-xs">
+                            <label className="label">
+                                <span className="label-text">Password</span>
                             </label>
                             <input
 
                                 type="password"
                                 placeholder="Your password"
-                                class="input input-bordered w-full max-w-xs"
+                                className="input input-bordered w-full max-w-xs"
 
                                 // password validation
                                 {...register("password", {
@@ -117,7 +122,7 @@ const Login = () => {
                             />
 
                             {/* show password validation error on ui */}
-                            <label class="label">
+                            <label className="label">
 
                                 {errors.password?.type === 'required' && <span className="label-text-alt text-red-500 ">{errors.password.message}</span>}
 

@@ -4,6 +4,7 @@ import auth from '../../firebase.init';
 import { useForm } from "react-hook-form";
 import Loading from '../Shared/Loading';
 import { Link, useNavigate } from 'react-router-dom';
+import useToken from '../../hooks/useToken';
 
 const SignUp = () => {
 
@@ -21,6 +22,8 @@ const SignUp = () => {
     // Using react firebase hook [update user]
     const [updateProfile, updating, UpdateError] = useUpdateProfile(auth);
 
+    const [token] = useToken(user || gUser);
+
 
     const navigate = useNavigate();
 
@@ -34,8 +37,8 @@ const SignUp = () => {
         signInError = <p className='text-red-500'><small>{error?.message || gError?.message} {UpdateError?.message}</small></p>
     }
 
-    if (user || gUser || updating) {
-        console.log(user || gUser)
+    if (token) {
+        navigate('/appointment');
     }
 
 
@@ -48,7 +51,7 @@ const SignUp = () => {
         await updateProfile({ displayName: data.name });
         console.log('Updated profile');
         // when user singUp navigate appointment page
-        navigate('/appointment');
+        // navigate('/appointment');
     };
 
     return (
@@ -62,16 +65,16 @@ const SignUp = () => {
                     <form onSubmit={handleSubmit(onSubmit)}>
 
                         {/* ___ name field ___ */}
-                        <div class="form-control w-full max-w-xs">
-                            <label class="label">
-                                <span class="label-text">Name</span>
+                        <div className="form-control w-full max-w-xs">
+                            <label className="label">
+                                <span className="label-text">Name</span>
 
                             </label>
                             <input
 
                                 type="text"
                                 placeholder="Your name"
-                                class="input input-bordered w-full max-w-xs"
+                                className="input input-bordered w-full max-w-xs"
 
                                 // name validation
                                 {...register("name", {
@@ -83,7 +86,7 @@ const SignUp = () => {
                             />
 
                             {/* show name validation error on ui */}
-                            <label class="label">
+                            <label className="label">
 
                                 {errors.name?.type === 'required' && <span className="label-text-alt text-red-500 ">{errors.name.message}</span>}
 
@@ -94,16 +97,16 @@ const SignUp = () => {
 
 
                         {/* ___ email field ___ */}
-                        <div class="form-control w-full max-w-xs">
-                            <label class="label">
-                                <span class="label-text">Email</span>
+                        <div className="form-control w-full max-w-xs">
+                            <label className="label">
+                                <span className="label-text">Email</span>
 
                             </label>
                             <input
 
                                 type="email"
                                 placeholder="Your email"
-                                class="input input-bordered w-full max-w-xs"
+                                className="input input-bordered w-full max-w-xs"
 
                                 // email validation
                                 {...register("email", {
@@ -119,7 +122,7 @@ const SignUp = () => {
                             />
 
                             {/* show email validation on ui */}
-                            <label class="label">
+                            <label className="label">
 
                                 {errors.email?.type === 'required' && <span className="label-text-alt text-red-500 ">{errors.email.message}</span>}
 
@@ -129,15 +132,15 @@ const SignUp = () => {
 
 
                         {/* ___ password field ___ */}
-                        <div class="form-control w-full max-w-xs">
-                            <label class="label">
-                                <span class="label-text">Password</span>
+                        <div className="form-control w-full max-w-xs">
+                            <label className="label">
+                                <span className="label-text">Password</span>
                             </label>
                             <input
 
                                 type="password"
                                 placeholder="Your password"
-                                class="input input-bordered w-full max-w-xs"
+                                className="input input-bordered w-full max-w-xs"
 
                                 // password validation
                                 {...register("password", {
@@ -153,7 +156,7 @@ const SignUp = () => {
                             />
 
                             {/* show password validation on ui */}
-                            <label class="label">
+                            <label className="label">
 
                                 {errors.password?.type === 'required' && <span className="label-text-alt text-red-500 ">{errors.password.message}</span>}
 
